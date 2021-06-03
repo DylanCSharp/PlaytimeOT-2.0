@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
-using System.Web.Mvc;
 
 namespace PlaytimeOT.Models
 {
-    public class Reg
+    public class RegisterUser
     {
         [Display(Name = "ID")]
         public int ID { get; set; }
@@ -51,7 +50,7 @@ namespace PlaytimeOT.Models
         //[Display(Name = "Security Answer")]
         //public string SecurityAnwser { get; set; }
 
-        public List<Reg> Reginfo { get; set; }
+        public List<RegisterUser> Reginfo { get; set; }
 
     }
 }
