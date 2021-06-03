@@ -82,7 +82,7 @@ namespace PlaytimeOT.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string firstName, string lastName, string email, string password,string confirmPassword)
+        public async Task<IActionResult> Register(string firstName, string lastName, string email, string password, string confirmPassword)
         {
             RegisterUser registerUser = new()
             {
@@ -92,8 +92,10 @@ namespace PlaytimeOT.Controllers
                 Password = password,
                 ConfirmPassword = confirmPassword
             };
+
             if (registerUser.ConfirmPassword != registerUser.Password)
             {
+                ViewBag.Error = "Passwords are not the same!";
                 return View();
             }
             using SqlConnection conn = new(_configuration.GetConnectionString("PlaytimeDB"));
@@ -102,6 +104,7 @@ namespace PlaytimeOT.Controllers
                 CommandType = CommandType.StoredProcedure
             };
             conn.Open();
+
             command.Parameters.AddWithValue("@firstName", registerUser.FirstName);
             command.Parameters.AddWithValue("@lastName", registerUser.LastName);
             command.Parameters.AddWithValue("@email", registerUser.Email);
