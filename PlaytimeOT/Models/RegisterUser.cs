@@ -9,7 +9,7 @@ namespace PlaytimeOT.Models
     public class RegisterUser
     {
         [Display(Name = "ID")]
-        public int ID { get; set; }
+        public int UserId { get; set; }
 
         [Required(ErrorMessage = "Please enter FirstName")]
         [Display(Name = "FirstName")]
@@ -29,7 +29,7 @@ namespace PlaytimeOT.Models
         [Required(ErrorMessage = "Please enter confirm password")]
         [Compare("Password", ErrorMessage = "Confirm password doesn't match, Type again !")]
         [DataType(DataType.Password)]
-        public string Confirmpwd { get; set; }
+        public string ConfirmPassword { get; set; }
         public Nullable<bool> Is_Deleted { get; set; }
 
         //[Display(Name = "Gender")]

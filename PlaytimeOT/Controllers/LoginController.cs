@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using PlaytimeOT.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,6 +17,7 @@ namespace PlaytimeOT.Controllers
     {
 
         private readonly IConfiguration _configuration;
+        private static string URL;
 
         public LoginController(IConfiguration configuration)
         {
@@ -26,11 +28,12 @@ namespace PlaytimeOT.Controllers
         public IActionResult Login(string returnURL)
         {
             ViewData["ReturnURL"] = returnURL;
+            URL = returnURL;
             return View();
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Validate(string email, string password, string returnURL)
+        public async Task<IActionResult> Validate(string email, string password)
         {
             using SqlConnection conn = new(_configuration.GetConnectionString("PlaytimeDB"));
             SqlCommand command = new("PTD.PROC_LOGIN", conn)
@@ -47,7 +50,7 @@ namespace PlaytimeOT.Controllers
             command.Dispose();
             conn.Close();
 
-            ViewData["ReturnUrl"] = returnURL;
+            ViewData["ReturnUrl"] = URL;
 
             if (loginResult == 1)
             {
@@ -62,13 +65,53 @@ namespace PlaytimeOT.Controllers
                 var claimsPrincipal = new ClaimsPrincipal(claimsId);
                 await HttpContext.SignInAsync(claimsPrincipal);
 
-                return Redirect(returnURL);
+                return Redirect(URL);
             }
             else
             {
                 TempData["Error"] = "Username or password is incorrect!";
                 return View("login");
             }
+        }
+
+        [HttpGet("register")]
+        public IActionResult Register(string returnURL)
+        {
+            ViewData["ReturnURL"] = returnURL;
+            return View();
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(string firstName, string lastName, string email, string password,string confirmPassword)
+        {
+            RegisterUser registerUser = new()
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                Password = password,
+                ConfirmPassword = confirmPassword
+            };
+            if (registerUser.ConfirmPassword != registerUser.Password)
+            {
+                return View();
+            }
+            using SqlConnection conn = new(_configuration.GetConnectionString("PlaytimeDB"));
+            SqlCommand command = new("PTD.PROC_REGISTER", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            conn.Open();
+            command.Parameters.AddWithValue("@firstName", registerUser.FirstName);
+            command.Parameters.AddWithValue("@lastName", registerUser.LastName);
+            command.Parameters.AddWithValue("@email", registerUser.Email);
+            command.Parameters.AddWithValue("@password", registerUser.Password);
+
+            command.ExecuteNonQuery();
+
+            await Validate(registerUser.Email, registerUser.Password);
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }
