@@ -111,6 +111,7 @@ namespace PlaytimeOT.Controllers
             command.Parameters.AddWithValue("@password", registerUser.Password);
 
             command.ExecuteNonQuery();
+            conn.Close();
 
             await Validate(registerUser.Email, registerUser.Password);
 
